@@ -1,0 +1,48 @@
+# Compiled Binaries & Executables
+darksight
+surface-intel
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Large AI Model Weights & Checkpoints (GGUF, safetensors, bin)
+*.gguf
+model
+model.gguf
+models/*
+!models/.gitkeep
+
+# Local Databases & State
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+surface-intel.db
+darksight.db
+
+# Telemetry Exports & Reports
+export.json
+*-export.json
+intel-export.json
+darksight-export.json
+
+# Operating System & IDE Artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs & Temporary Files
+*.log
+tmp/
+temp/

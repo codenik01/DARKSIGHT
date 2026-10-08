@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARKSIGHT // Autonomous Attack Surface Intelligence & Vulnerability Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #05080e;
+            --bg-panel: #0a0f1d;
+            --bg-card: #0f172a;
+            --border-dim: #1e293b;
+            --border-bright: #334155;
+            --cyan-glow: #06b6d4;
+            --emerald-glow: #10b981;
+            --amber-glow: #f59e0b;
+            --rose-glow: #f43f5e;
+        }
+        body {
+            background-color: var(--bg-deep);
+            color: #cbd5e1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: -0.01em;
+        }
+        .font-mono-code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .tactical-border {
+            border: 1px solid var(--border-dim);
+        }
+        .tactical-border:hover {
+            border-color: var(--border-bright);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        /* Custom scrollbar for high-density console */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070b14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-cyan-900 selection:text-cyan-100">
+
+    <!-- Top Command Navigation -->
+    <header class="bg-[#070b14] border-b border-slate-800/80 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <!-- Brand / Callout -->
+            <div class="flex items-center space-x-3">
+                <div class="h-8 w-8 rounded bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-mono-code font-bold text-sm shadow-inner">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </div>
+                <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-black tracking-widest text-white uppercase font-mono-code">DARKSIGHT</span>
+                        <span class="text-[10px] bg-slate-800 text-cyan-400 border border-slate-700 font-mono-code px-1.5 py-0.2 rounded font-semibold">v2.4-AUTONOMOUS</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-mono-code uppercase tracking-wider">Attack Surface Intelligence & Self-Refining Bug Hunter</span>
+                </div>
+            </div>
+
+            <!-- Operational Telemetry Indicators -->
+            <div class="hidden md:flex items-center space-x-6 text-xs font-mono-code">
+                <div class="flex items-center space-x-2 text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>ENGINE: <span class="text-emerald-400 font-bold">ACTIVE</span></span>
+                </div>
+                <div class="flex items-center space-x-2 text-slate-400">
+                    <i class="fa-solid fa-brain text-cyan-400 text-[11px]"></i>
+                    <span>EXPERIENCE DB: <span class="text-cyan-400 font-bold" id="header-db-status">ONLINE</span></span>
+                </div>
+                <div class="flex items-center space-x-2 text-slate-400">
+                    <i class="fa-solid fa-filter text-amber-400 text-[11px]"></i>
+                    <span>VERIFIER FP FILTER: <span class="text-amber-400 font-bold">ENGAGED</span></span>
+                </div>
+            </div>
+
+            <!-- Command Actions -->
+            <div class="flex items-center space-x-2.5">
+                <button onclick="downloadPDFReport()" title="Print / Export Full PDF Report" class="h-8 px-3 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-mono-code transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-file-pdf text-rose-400 text-xs"></i>
+                    <span class="hidden sm:inline">REPORT</span>
+                </button>
+                <button onclick="clearAllHistory()" title="Purge historical databases" class="h-8 px-3 rounded bg-slate-900 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-800/80 text-slate-400 hover:text-rose-300 text-xs font-mono-code transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    <span class="hidden sm:inline">CLEAR</span>
+                </button>
+                <button onclick="openScanModal()" class="h-8 px-4 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs font-mono-code transition shadow-md shadow-cyan-950 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-bolt text-xs"></i>
+                    <span>RUN AUTONOMOUS LOOP</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Navbar Architecture Banner -->
+    <div class="bg-[#0a0f1d] border-b border-slate-800/60 px-4 sm:px-6 lg:px-8 py-2.5">
+        <div class="max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-3 text-[11px] font-mono-code text-slate-400">
+            <div class="flex items-center space-x-2 flex-wrap">
+                <span class="text-slate-500 uppercase font-semibold">Orchestration Flow:</span>
+                <span class="text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Scope Manager</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Recon (Subfinder/DNSx/HTTPx)</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">Asset Graph</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-cyan-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">AI Planner</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Tools</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">AI Analyzer</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60">Active Verifier</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60">Experience DB (4-Tier)</span>
+                <span class="text-slate-600">&rarr;</span>
+                <span class="text-emerald-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">Learning Engine</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <label for="target-selector" class="text-slate-500">TARGET SCOPE:</label>
+                <select id="target-selector" onchange="loadData()" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded px-2.5 py-1 focus:outline-none focus:border-cyan-500">
+                    <option value="">[ALL ACTIVE TARGETS]</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Operational Workspace -->
+    <main class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1 w-full space-y-5">
+
+        <!-- High-Density Telemetry Metrics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>TARGETS</span>
+                    <i class="fa-solid fa-bullseye text-cyan-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-targets" class="text-2xl font-black text-white font-mono-code">0</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Domains</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>SUBDOMAINS</span>
+                    <i class="fa-solid fa-network-wired text-blue-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-subdomains" class="text-2xl font-black text-white font-mono-code">0</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Resolved</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>HTTP SERVICES</span>
+                    <i class="fa-solid fa-server text-emerald-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-services" class="text-2xl font-black text-white font-mono-code">0</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Live</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>API ENDPOINTS</span>
+                    <i class="fa-solid fa-code text-purple-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-endpoints" class="text-2xl font-black text-white font-mono-code">0</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Crawled</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>VERIFIED BUGS</span>
+                    <i class="fa-solid fa-shield-virus text-rose-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-findings" class="text-2xl font-black text-rose-400 font-mono-code">0</span>
+                    <span class="text-[10px] text-rose-500 font-mono-code uppercase">Confirmed</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>LEARNED STRATEGIES</span>
+                    <i class="fa-solid fa-diagram-project text-amber-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-strategies" class="text-2xl font-black text-amber-400 font-mono-code">3</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Active</span>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0f1d] border border-slate-800 rounded p-3.5 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 font-mono-code text-[11px]">
+                    <span>FP LESSONS</span>
+                    <i class="fa-solid fa-user-shield text-cyan-400"></i>
+                </div>
+                <div class="mt-2 flex items-baseline justify-between">
+                    <span id="stat-failures" class="text-2xl font-black text-cyan-400 font-mono-code">0</span>
+                    <span class="text-[10px] text-slate-500 font-mono-code uppercase">Mistakes Prevented</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Telemetry Terminal Console -->
+        <div class="bg-[#070b14] border border-slate-800 rounded overflow-hidden">
+            <div class="bg-[#0a0f1d] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
+                    <span class="ml-2 text-xs font-mono-code font-bold text-slate-300 uppercase tracking-wider">Tactical Event Bus & AI Reasoning Stream</span>
+                </div>
+                <div class="flex items-center space-x-3 text-xs font-mono-code">
+                    <span id="pipeline-progress-badge" class="hidden text-cyan-400 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded">
+                        PROGRESS: <span id="pipeline-pct">0</span>%
+                    </span>
+                    <button onclick="clearConsole()" class="text-slate-500 hover:text-slate-300 text-[11px]">CLEAR LOGS</button>
+                </div>
+            </div>
+            <div id="console-output" class="p-4 font-mono-code text-[11px] text-slate-300 h-44 overflow-y-auto space-y-1 bg-[#05080e]">
+                <div class="text-slate-600">[00:00:00] [SYSTEM] Darksight Engine initialized. Scope Manager & 4-Tier Memory operational.</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs & Tactical Data Panels -->
+        <div class="bg-[#0a0f1d] border border-slate-800 rounded overflow-hidden">
+            <!-- Tabs Menu -->
+            <div class="border-b border-slate-800 px-4 flex flex-wrap items-center justify-between gap-3 bg-[#070b14]">
+                <div class="flex items-center space-x-1 sm:space-x-3 overflow-x-auto text-xs font-mono-code">
+                    <button onclick="switchTab('findings')" id="tab-btn-findings" class="tab-btn px-3 py-3 font-semibold text-rose-400 border-b-2 border-rose-500 flex items-center space-x-2">
+                        <span>VERIFIED FINDINGS</span>
+                        <span id="findings-badge" class="bg-rose-950 text-rose-300 text-[10px] px-1.5 py-0.2 rounded border border-rose-800">0</span>
+                    </button>
+                    <button onclick="switchTab('graph')" id="tab-btn-graph" class="tab-btn px-3 py-3 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5">
+                        <i class="fa-solid fa-diagram-project text-cyan-400 text-xs"></i>
+                        <span>ASSET GRAPH</span>
+                    </button>
+                    <button onclick="switchTab('memory')" id="tab-btn-memory" class="tab-btn px-3 py-3 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center space-x-1.5">
+                        <i class="fa-solid fa-brain text-emerald-400 text-xs"></i>
+                        <span>EXPERIENCE DB (4-TIER)</span>
+                    </button>
+                    <button onclick="switchTab('subdomains')" id="tab-btn-subdomains" class="tab-btn px-3 py-3 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
+                        <span>SUBDOMAINS</span>
+                    </button>
+                    <button onclick="switchTab('services')" id="tab-btn-services" class="tab-btn px-3 py-3 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
+                        <span>HTTP SERVICES</span>
+                    </button>
+                    <button onclick="switchTab('endpoints')" id="tab-btn-endpoints" class="tab-btn px-3 py-3 font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent">
+                        <span>API ENDPOINTS</span>
+                    </button>
+                </div>
+
+                <div class="py-2 flex items-center space-x-2">
+                    <button onclick="loadData()" class="text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1 rounded font-mono-code flex items-center space-x-1">
+                        <i class="fa-solid fa-rotate-right text-[10px]"></i>
+                        <span>SYNC</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab 1: Verified Findings (Finding Memory) -->
+            <div id="view-findings" class="tab-view p-5">
+                <div class="mb-3 flex items-center justify-between text-xs font-mono-code text-slate-400">
+                    <div>
+                        <span class="text-white font-bold uppercase">CONFIRMED VULNERABILITY DOSSIER</span>
+                        <span class="text-slate-500 ml-2">// All entries reproduced and filtered through Verifier engine</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto border border-slate-800 rounded">
+                    <table class="w-full text-left text-xs font-mono-code text-slate-300">
+                        <thead class="bg-[#070b14] uppercase text-slate-500 border-b border-slate-800">
+                            <tr>
+                                <th class="px-3.5 py-2.5">Severity</th>
+                                <th class="px-3.5 py-2.5">CVSS</th>
+                                <th class="px-3.5 py-2.5">Vulnerability Title & Assessment</th>
+                                <th class="px-3.5 py-2.5">Target Endpoint</th>
+                                <th class="px-3.5 py-2.5">Verification Proof & Reproduction</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-findings" class="divide-y divide-slate-800/80 bg-[#0a0f1d]">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No confirmed vulnerabilities. Run an autonomous pipeline scan to begin analysis.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Asset Graph Explorer -->
+            <div id="view-graph" class="tab-view p-5 hidden">
+                <div class="mb-4 flex items-center justify-between text-xs font-mono-code text-slate-400">
+                    <div>
+                        <span class="text-white font-bold uppercase">MULTI-HOP ASSET TOPOLOGY GRAPH</span>
+                        <span class="text-slate-500 ml-2">// Nodes: TARGET &rarr; HOST &rarr; SERVICE &rarr; ENDPOINT &rarr; TECH</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-[11px]">
+                        <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 bg-cyan-500 rounded-sm"></span><span>Target</span></span>
+                        <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span><span>Host</span></span>
+                        <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span><span>Service</span></span>
+                        <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 bg-purple-500 rounded-sm"></span><span>Endpoint</span></span>
+                        <span class="flex items-center space-x-1"><span class="w-2.5 h-2.5 bg-amber-500 rounded-sm"></span><span>Tech</span></span>
+                    </div>
+                </div>
+
+                <div id="graph-container" class="bg-[#05080e] border border-slate-800 rounded p-4 min-h-[360px] flex flex-col justify-center">
+                    <div id="graph-node-matrix" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div class="text-center text-slate-500 font-mono-code col-span-full py-12">
+                            Asset Graph empty. Run autonomous loop on a target to synthesize graph topology.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: 4-Tier Experience Memory -->
+            <div id="view-memory" class="tab-view p-5 hidden space-y-6">
+                <!-- Memory Tier Navigation & Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 font-mono-code text-xs">
+                    <div class="bg-[#070b14] border border-slate-800 rounded p-3">
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Tier 1: Finding Memory</div>
+                        <div class="text-xl font-bold text-white mt-1" id="mem-stat-findings">0</div>
+                        <div class="text-slate-500 text-[10px] mt-0.5">Verified vulnerability models</div>
+                    </div>
+                    <div class="bg-[#070b14] border border-slate-800 rounded p-3">
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Tier 2: Failure Memory</div>
+                        <div class="text-xl font-bold text-cyan-400 mt-1" id="mem-stat-failures">0</div>
+                        <div class="text-slate-500 text-[10px] mt-0.5">Rejected FPs & lessons learned</div>
+                    </div>
+                    <div class="bg-[#070b14] border border-slate-800 rounded p-3">
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Tier 3: Strategy Memory</div>
+                        <div class="text-xl font-bold text-amber-400 mt-1" id="mem-stat-strategies">3</div>
+                        <div class="text-slate-500 text-[10px] mt-0.5">Learned test paths & success rates</div>
+                    </div>
+                    <div class="bg-[#070b14] border border-slate-800 rounded p-3">
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Tier 4: Tool Utility</div>
+                        <div class="text-xl font-bold text-emerald-400 mt-1" id="mem-stat-tools">3</div>
+                        <div class="text-slate-500 text-[10px] mt-0.5">Contextual tool rankings</div>
+                    </div>
+                </div>
+
+                <!-- Sub-Section: Strategy Memory -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-mono-code">
+                        <span class="text-white font-bold uppercase tracking-wider">STRATEGY MEMORY (LEARNED TACTICAL WEIGHTS)</span>
+                        <span class="text-slate-500">// Neural weights remain frozen; Planner queries deterministic success probabilities</span>
+                    </div>
+                    <div id="strategy-cards" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Sub-Section: Failure Memory -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-mono-code">
+                        <span class="text-white font-bold uppercase tracking-wider">FAILURE MEMORY (FP LESSONS & REJECTION LOG)</span>
+                        <span class="text-slate-500">// Teaches Planner what NOT to do based on Verifier rejections</span>
+                    </div>
+                    <div id="failure-cards" class="space-y-2">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Sub-Section: Tool Effectiveness -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-xs font-mono-code">
+                        <span class="text-white font-bold uppercase tracking-wider">TOOL EFFECTIVENESS MATRIX</span>
+                        <span class="text-slate-500">// Bayesian scoring across target categories</span>
+                    </div>
+                    <div id="tool-matrix-cards" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Subdomains -->
+            <div id="view-subdomains" class="tab-view p-5 hidden">
+                <div class="overflow-x-auto border border-slate-800 rounded">
+                    <table class="w-full text-left text-xs font-mono-code text-slate-300">
+                        <thead class="bg-[#070b14] uppercase text-slate-500 border-b border-slate-800">
+                            <tr>
+                                <th class="px-3.5 py-2.5">Hostname</th>
+                                <th class="px-3.5 py-2.5">IP Address</th>
+                                <th class="px-3.5 py-2.5">Source</th>
+                                <th class="px-3.5 py-2.5">Discovered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-subdomains" class="divide-y divide-slate-800/80 bg-[#0a0f1d]">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No subdomains discovered yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 5: HTTP Services -->
+            <div id="view-services" class="tab-view p-5 hidden">
+                <div class="overflow-x-auto border border-slate-800 rounded">
+                    <table class="w-full text-left text-xs font-mono-code text-slate-300">
+                        <thead class="bg-[#070b14] uppercase text-slate-500 border-b border-slate-800">
+                            <tr>
+                                <th class="px-3.5 py-2.5">Service URL</th>
+                                <th class="px-3.5 py-2.5">Status</th>
+                                <th class="px-3.5 py-2.5">Page Title</th>
+                                <th class="px-3.5 py-2.5">Tech Detected</th>
+                                <th class="px-3.5 py-2.5">Web Server</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-services" class="divide-y divide-slate-800/80 bg-[#0a0f1d]">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No active HTTP services probed yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 6: API Endpoints -->
+            <div id="view-endpoints" class="tab-view p-5 hidden">
+                <div class="overflow-x-auto border border-slate-800 rounded">
+                    <table class="w-full text-left text-xs font-mono-code text-slate-300">
+                        <thead class="bg-[#070b14] uppercase text-slate-500 border-b border-slate-800">
+                            <tr>
+                                <th class="px-3.5 py-2.5">Endpoint URL</th>
+                                <th class="px-3.5 py-2.5">Method</th>
+                                <th class="px-3.5 py-2.5">Discovered Parameters</th>
+                                <th class="px-3.5 py-2.5">Discovered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-endpoints" class="divide-y divide-slate-800/80 bg-[#0a0f1d]">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No API endpoints crawled yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Run Autonomous Scan -->
+    <div id="scan-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#0a0f1d] border border-slate-700 rounded-lg max-w-md w-full overflow-hidden shadow-2xl">
+            <div class="bg-[#070b14] px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-crosshairs text-cyan-400 text-sm"></i>
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider font-mono-code">Execute Darksight Autonomous Loop</h3>
+                </div>
+                <button onclick="closeScanModal()" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="submitScan(event)" class="p-5 space-y-4 font-mono-code text-xs">
+                <div>
+                    <label class="block text-slate-400 font-bold mb-1">TARGET DOMAIN / SCOPE</label>
+                    <input type="text" id="scan-target" required placeholder="e.g. example.com or app.target.io" class="w-full bg-[#05080e] border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                    <p class="text-[10px] text-slate-500 mt-1">Scope Manager will automatically isolate hosts and validate wildcard domain bounds.</p>
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-bold mb-1">WORKFLOW PROFILE</label>
+                    <select id="scan-workflow" class="w-full bg-[#05080e] border border-slate-700 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="full">Autonomous Deep Hunter (Recon + Graph + Planner + Verifier + Learn)</option>
+                        <option value="fast">Fast Posture Probe (Active Headers & Exposure Checks)</option>
+                    </select>
+                </div>
+                <div class="p-3 bg-[#05080e] border border-slate-800 rounded text-[11px] text-slate-400 space-y-1">
+                    <div class="text-cyan-400 font-bold">&bull; Verified Proof Engine:</div>
+                    <div>Zero mock findings. Verifier actively attempts reproduction and discards soft-404 and SPA catch-alls.</div>
+                </div>
+                <div class="flex justify-end space-x-2.5 pt-2">
+                    <button type="button" onclick="closeScanModal()" class="px-3.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">CANCEL</button>
+                    <button type="submit" class="px-4 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-black font-bold">START RUN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- UI Scripts -->
+    <script>
+        let currentTargetId = '';
+        let sseSource = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSSE();
+            loadStats();
+            loadTargets();
+            loadData();
+            loadExperienceDB();
+            loadAssetGraph();
+        });
+
+        function initSSE() {
+            if (sseSource) sseSource.close();
+            sseSource = new EventSource('/api/events');
+
+            sseSource.onmessage = (e) => {
+                try {
+                    const event = JSON.parse(e.data);
+                    renderLog(event);
+                    const progress = event.progress !== undefined ? event.progress : event.Progress;
+                    if (progress !== undefined && progress > 0) {
+                        const badge = document.getElementById('pipeline-progress-badge');
+                        const pct = document.getElementById('pipeline-pct');
+                        badge.classList.remove('hidden');
+                        pct.innerText = progress;
+                        if (progress >= 100) {
+                            setTimeout(() => { badge.classList.add('hidden'); }, 4000);
+                            loadStats();
+                            loadTargets();
+                            loadData();
+                            loadExperienceDB();
+                            loadAssetGraph();
+                        }
+                    }
+                } catch (err) {
+                    console.error("SSE parse error", err);
+                }
+            };
+
+            sseSource.onerror = () => {
+                document.getElementById('header-db-status').innerText = 'RECONNECTING';
+                document.getElementById('header-db-status').className = 'text-amber-400 font-bold';
+            };
+            sseSource.onopen = () => {
+                document.getElementById('header-db-status').innerText = 'ONLINE';
+                document.getElementById('header-db-status').className = 'text-cyan-400 font-bold';
+            };
+        }
+
+        function renderLog(ev) {
+            const out = document.getElementById('console-output');
+            const ts = ev.timestamp || ev.Timestamp || Date.now();
+            const time = new Date(ts).toLocaleTimeString();
+            const msg = ev.message || ev.Message || '';
+            const stage = ev.stage || ev.Stage || 'PIPELINE';
+            const level = (ev.level || ev.Level || 'INFO').toUpperCase();
+
+            let color = 'text-slate-300';
+            if (level === 'ERROR') color = 'text-rose-400 font-bold';
+            if (level === 'WARN') color = 'text-amber-400';
+            if (level === 'SUCCESS') color = 'text-emerald-400 font-bold';
+            if (msg.includes('[AI PLANNER]')) color = 'text-cyan-400 font-bold';
+            if (msg.includes('[AI ANALYZER]')) color = 'text-purple-300 font-semibold';
+            if (msg.includes('[VERIFIER - CONFIRMED]')) color = 'text-emerald-300 font-bold';
+            if (msg.includes('[VERIFIER - REJECTED FP]')) color = 'text-slate-400 italic';
+            if (msg.includes('[LEARNING ENGINE]')) color = 'text-amber-300';
+            if (msg.includes('[AI Model Triage]')) color = 'text-cyan-300 font-semibold';
+
+            const line = document.createElement('div');
+            line.className = color;
+            line.innerHTML = `<span class="text-slate-600">[${time}]</span> <span class="text-slate-500 font-bold">[${stage.toUpperCase()}]</span> ${escapeHTML(msg)}`;
+            out.appendChild(line);
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '<div class="text-slate-600">[SYSTEM] Terminal logs cleared.</div>';
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                document.getElementById('stat-targets').innerText = data.targets || 0;
+                document.getElementById('stat-subdomains').innerText = data.subdomains || 0;
+                document.getElementById('stat-services').innerText = data.services || 0;
+                document.getElementById('stat-endpoints').innerText = data.endpoints || 0;
+                document.getElementById('stat-findings').innerText = data.findings || 0;
+                document.getElementById('findings-badge').innerText = data.findings || 0;
+            } catch (err) {
+                console.error("Failed to load stats", err);
+            }
+        }
+
+        async function loadTargets() {
+            try {
+                const res = await fetch('/api/targets');
+                const targets = await res.json();
+                const sel = document.getElementById('target-selector');
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">[ALL ACTIVE TARGETS]</option>';
+                targets.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.innerText = `${t.domain} (Score: ${t.risk_score || 0})`;
+                    sel.appendChild(opt);
+                });
+                if (prev) sel.value = prev;
+            } catch (err) {
+                console.error("Failed to load targets", err);
+            }
+        }
+
+        async function loadData() {
+            const targetId = document.getElementById('target-selector').value;
+            currentTargetId = targetId;
+            const q = targetId ? `?target_id=${encodeURIComponent(targetId)}` : '';
+
+            // Load Findings
+            try {
+                const res = await fetch('/api/findings' + q);
+                const findings = await res.json();
+                renderFindings(findings);
+            } catch(e) {}
+
+            // Load Subdomains
+            try {
+                const res = await fetch('/api/subdomains' + q);
+                const subs = await res.json();
+                renderSubdomains(subs);
+            } catch(e) {}
+
+            // Load Services
+            try {
+                const res = await fetch('/api/services' + q);
+                const svcs = await res.json();
+                renderServices(svcs);
+            } catch(e) {}
+
+            // Load Endpoints
+            try {
+                const res = await fetch('/api/endpoints' + q);
+                const eps = await res.json();
+                renderEndpoints(eps);
+            } catch(e) {}
+
+            loadAssetGraph();
+            loadExperienceDB();
+        }
+
+        function renderFindings(list) {
+            const tbody = document.getElementById('table-findings');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500 font-mono-code">No confirmed findings detected for current scope.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(f => {
+                let badgeClass = 'text-cyan-400 bg-cyan-950/60 border-cyan-800';
+                const s = (f.severity || '').toUpperCase();
+                if (s === 'CRITICAL') badgeClass = 'text-rose-400 bg-rose-950/80 border-rose-800 font-bold';
+                else if (s === 'HIGH') badgeClass = 'text-rose-300 bg-rose-950/60 border-rose-800';
+                else if (s === 'MEDIUM') badgeClass = 'text-amber-400 bg-amber-950/60 border-amber-800';
+                else if (s === 'LOW') badgeClass = 'text-blue-400 bg-blue-950/60 border-blue-800';
+
+                return `
+                    <tr class="hover:bg-[#070b14] transition">
+                        <td class="px-3.5 py-3 font-mono-code">
+                            <span class="px-2 py-0.5 rounded border text-[11px] ${badgeClass}">${escapeHTML(f.severity || 'INFO')}</span>
+                        </td>
+                        <td class="px-3.5 py-3 font-mono-code font-bold text-slate-200">
+                            ${f.cvss_score ? f.cvss_score.toFixed(1) : '3.1'}
+                        </td>
+                        <td class="px-3.5 py-3">
+                            <div class="font-bold text-white">${escapeHTML(f.title)}</div>
+                            <div class="text-slate-400 text-[11px] mt-0.5">${escapeHTML(f.description || '')}</div>
+                        </td>
+                        <td class="px-3.5 py-3 font-mono-code text-cyan-300">
+                            <a href="${escapeHTML(f.asset_url)}" target="_blank" class="hover:underline">${escapeHTML(f.asset_url)}</a>
+                        </td>
+                        <td class="px-3.5 py-3 text-[11px] font-mono-code text-emerald-400">
+                            <div class="bg-[#05080e] p-2 rounded border border-slate-800 overflow-x-auto max-w-sm">
+                                <code>${escapeHTML(f.evidence && f.evidence.curl_command ? f.evidence.curl_command : f.match_string || 'Active response verified')}</code>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderSubdomains(list) {
+            const tbody = document.getElementById('table-subdomains');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No subdomains recorded.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(s => `
+                <tr class="hover:bg-[#070b14]">
+                    <td class="px-3.5 py-2.5 text-white font-mono-code font-bold">${escapeHTML(s.host)}</td>
+                    <td class="px-3.5 py-2.5 text-slate-400 font-mono-code">${escapeHTML(s.ip_address || 'Resolved')}</td>
+                    <td class="px-3.5 py-2.5 text-slate-500 font-mono-code">${escapeHTML(s.source || 'Recon')}</td>
+                    <td class="px-3.5 py-2.5 text-slate-500 font-mono-code">${new Date(s.discovered_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderServices(list) {
+            const tbody = document.getElementById('table-services');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500">No active HTTP services recorded.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(s => {
+                let statusColor = 'text-emerald-400';
+                if (s.status_code >= 400) statusColor = 'text-amber-400';
+                if (s.status_code >= 500) statusColor = 'text-rose-400';
+                const techs = (s.tech || []).map(t => `<span class="bg-slate-800 border border-slate-700 text-cyan-300 text-[10px] px-1.5 py-0.2 rounded mr-1">${escapeHTML(t)}</span>`).join('');
+                return `
+                    <tr class="hover:bg-[#070b14]">
+                        <td class="px-3.5 py-2.5 text-cyan-300 font-mono-code font-bold">
+                            <a href="${escapeHTML(s.url)}" target="_blank" class="hover:underline">${escapeHTML(s.url)}</a>
+                        </td>
+                        <td class="px-3.5 py-2.5 font-mono-code font-bold ${statusColor}">${s.status_code || 200}</td>
+                        <td class="px-3.5 py-2.5 text-slate-300">${escapeHTML(s.title || '-')}</td>
+                        <td class="px-3.5 py-2.5">${techs || '<span class="text-slate-600">-</span>'}</td>
+                        <td class="px-3.5 py-2.5 text-slate-400 font-mono-code">${escapeHTML(s.web_server || 'Generic')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderEndpoints(list) {
+            const tbody = document.getElementById('table-endpoints');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">No endpoints recorded.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(e => {
+                const params = (e.params || []).map(p => `<span class="bg-slate-800 border border-slate-700 text-purple-300 text-[10px] px-1 py-0.2 rounded mr-1">${escapeHTML(p)}</span>`).join('');
+                return `
+                    <tr class="hover:bg-[#070b14]">
+                        <td class="px-3.5 py-2.5 text-slate-200 font-mono-code font-bold">
+                            <a href="${escapeHTML(e.url)}" target="_blank" class="hover:underline">${escapeHTML(e.url)}</a>
+                        </td>
+                        <td class="px-3.5 py-2.5 font-mono-code text-cyan-400 font-bold">${escapeHTML(e.method || 'GET')}</td>
+                        <td class="px-3.5 py-2.5">${params || '<span class="text-slate-600">-</span>'}</td>
+                        <td class="px-3.5 py-2.5 text-slate-500 font-mono-code">${new Date(e.discovered_at).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function loadAssetGraph() {
+            try {
+                const res = await fetch('/api/graph');
+                const graph = await res.json();
+                renderGraph(graph);
+            } catch(e) {
+                console.error("Failed to load graph", e);
+            }
+        }
+
+        function renderGraph(g) {
+            const container = document.getElementById('graph-node-matrix');
+            if (!g || !g.nodes || Object.keys(g.nodes).length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-500 font-mono-code col-span-full py-12">Asset Graph empty. Run autonomous loop on a target to synthesize graph topology.</div>';
+                return;
+            }
+            const nodes = Object.values(g.nodes);
+            container.innerHTML = nodes.map(n => {
+                let badge = 'bg-cyan-950 text-cyan-400 border-cyan-800';
+                if (n.type === 'HOST') badge = 'bg-blue-950 text-blue-400 border-blue-800';
+                if (n.type === 'SERVICE') badge = 'bg-emerald-950 text-emerald-400 border-emerald-800';
+                if (n.type === 'ENDPOINT') badge = 'bg-purple-950 text-purple-400 border-purple-800';
+                if (n.type === 'TECH') badge = 'bg-amber-950 text-amber-400 border-amber-800';
+                if (n.type === 'PARAMETER') badge = 'bg-slate-800 text-slate-300 border-slate-700';
+
+                return `
+                    <div class="bg-[#070b14] border border-slate-800 rounded p-3 text-xs font-mono-code flex flex-col justify-between space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-1.5 py-0.5 rounded border text-[10px] font-bold ${badge}">${n.type}</span>
+                            <span class="text-slate-600 text-[10px]">${n.id.substring(0, 12)}</span>
+                        </div>
+                        <div class="text-white font-bold truncate text-[11px]">${escapeHTML(n.label)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadExperienceDB() {
+            try {
+                const [statsRes, stratRes, failRes, toolRes] = await Promise.all([
+                    fetch('/api/memory/stats').then(r => r.json()).catch(() => ({})),
+                    fetch('/api/memory/strategies').then(r => r.json()).catch(() => ([])),
+                    fetch('/api/memory/failures').then(r => r.json()).catch(() => ([])),
+                    fetch('/api/memory/tools').then(r => r.json()).catch(() => ([]))
+                ]);
+
+                document.getElementById('mem-stat-findings').innerText = statsRes.total_confirmed_findings || 0;
+                document.getElementById('mem-stat-failures').innerText = statsRes.total_failure_lessons || 0;
+                document.getElementById('stat-failures').innerText = statsRes.total_failure_lessons || 0;
+                document.getElementById('mem-stat-strategies').innerText = (stratRes || []).length || 3;
+                document.getElementById('stat-strategies').innerText = (stratRes || []).length || 3;
+                document.getElementById('mem-stat-tools').innerText = (toolRes || []).length || 3;
+
+                // Render Strategy Cards
+                const stratContainer = document.getElementById('strategy-cards');
+                if (!stratRes || stratRes.length === 0) {
+                    stratContainer.innerHTML = '<div class="text-slate-500 font-mono-code col-span-full">No active strategies learned.</div>';
+                } else {
+                    stratContainer.innerHTML = stratRes.map(st => `
+                        <div class="bg-[#070b14] border border-slate-800 rounded p-3 font-mono-code text-xs space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-cyan-400 font-bold text-[11px] truncate">${escapeHTML(st.context)}</span>
+                                <span class="text-emerald-400 font-bold">${st.success_rate.toFixed(1)}%</span>
+                            </div>
+                            <div class="text-white text-[11px] font-semibold">${escapeHTML(st.hypothesis)}</div>
+                            <div class="text-slate-400 text-[10px] bg-[#05080e] p-2 rounded border border-slate-800">
+                                <span class="text-slate-500">Best Action:</span> ${escapeHTML(st.best_action)}
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1">
+                                <span>Trials: ${st.trials_count || 0}</span>
+                                <span class="text-emerald-400">Confirmed: ${st.confirmed_count || 0}</span>
+                                <span class="text-rose-400">FP: ${st.false_positive_count || 0}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Render Failure Cards
+                const failContainer = document.getElementById('failure-cards');
+                if (!failRes || failRes.length === 0) {
+                    failContainer.innerHTML = '<div class="text-slate-500 font-mono-code text-xs bg-[#070b14] border border-slate-800 p-3 rounded">Zero false positives currently in failure memory. Verifier actively discards non-reproducible candidates before recording.</div>';
+                } else {
+                    failContainer.innerHTML = failRes.map(f => `
+                        <div class="bg-[#070b14] border border-rose-950/60 rounded p-3 font-mono-code text-xs space-y-1.5">
+                            <div class="flex items-center justify-between text-rose-400 font-bold">
+                                <span>AI THOUGHT: ${escapeHTML(f.what_ai_thought)}</span>
+                                <span class="text-[10px] text-slate-500">REJECTED BY VERIFIER</span>
+                            </div>
+                            <div class="text-slate-300 text-[11px]"><span class="text-slate-500">Action:</span> ${escapeHTML(f.action_taken)}</div>
+                            <div class="text-amber-300 text-[11px]"><span class="text-slate-500">Why Wrong:</span> ${escapeHTML(f.why_was_it_wrong)}</div>
+                            <div class="text-cyan-400 text-[11px] bg-[#05080e] p-2 rounded border border-slate-800">
+                                <span class="text-slate-500 font-bold">LESSON LEARNED:</span> ${escapeHTML(f.lesson_learned)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                // Render Tool Matrix Cards
+                const toolContainer = document.getElementById('tool-matrix-cards');
+                if (!toolRes || toolRes.length === 0) {
+                    toolContainer.innerHTML = '<div class="text-slate-500 font-mono-code col-span-full">Tool utility data empty.</div>';
+                } else {
+                    toolContainer.innerHTML = toolRes.map(t => {
+                        const scoreEntries = Object.entries(t.tool_scores || {}).map(([tool, score]) => `
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-400">${escapeHTML(tool)}</span>
+                                <span class="text-cyan-400 font-bold">${score.toFixed(1)}%</span>
+                            </div>
+                        `).join('');
+                        return `
+                            <div class="bg-[#070b14] border border-slate-800 rounded p-3 font-mono-code text-xs space-y-2">
+                                <div class="text-white font-bold text-[11px] uppercase">${escapeHTML(t.context)}</div>
+                                <div class="space-y-1 bg-[#05080e] p-2 rounded border border-slate-800">
+                                    ${scoreEntries}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+            } catch(e) {
+                console.error("Failed to load experience DB", e);
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-rose-500', 'border-cyan-500', 'text-rose-400', 'text-cyan-400');
+                b.classList.add('border-transparent', 'text-slate-400');
+            });
+            document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+
+            const activeBtn = document.getElementById('tab-btn-' + tabId);
+            const activeView = document.getElementById('view-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'text-slate-400');
+                if (tabId === 'findings') {
+                    activeBtn.classList.add('border-rose-500', 'text-rose-400');
+                } else {
+                    activeBtn.classList.add('border-cyan-500', 'text-cyan-400');
+                }
+            }
+            if (activeView) activeView.classList.remove('hidden');
+        }
+
+        function openScanModal() {
+            document.getElementById('scan-modal').classList.remove('hidden');
+        }
+
+        function closeScanModal() {
+            document.getElementById('scan-modal').classList.add('hidden');
+        }
+
+        async function submitScan(e) {
+            e.preventDefault();
+            const target = document.getElementById('scan-target').value.trim();
+            const workflow = document.getElementById('scan-workflow').value;
+            if (!target) return;
+
+            closeScanModal();
+            renderLog({
+                Stage: 'DISPATCH',
+                Level: 'INFO',
+                Message: `Initiating Darksight autonomous loop on ${target} (${workflow})...`,
+                Timestamp: new Date().toISOString()
+            });
+
+            try {
+                const res = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ domain: target, workflow })
+                });
+                const data = await res.json();
+                renderLog({
+                    Stage: 'DISPATCH',
+                    Level: 'SUCCESS',
+                    Message: data.message || 'Scan successfully queued in background pipeline engine',
+                    Timestamp: new Date().toISOString()
+                });
+            } catch(err) {
+                renderLog({
+                    Stage: 'DISPATCH',
+                    Level: 'ERROR',
+                    Message: `Failed to dispatch pipeline: ${err.message}`,
+                    Timestamp: new Date().toISOString()
+                });
+            }
+        }
+
+        function downloadPDFReport() {
+            const targetId = document.getElementById('target-selector').value;
+            const url = '/api/report' + (targetId ? `?target_id=${encodeURIComponent(targetId)}` : '');
+            window.open(url, '_blank');
+        }
+
+        async function clearAllHistory() {
+            if (!confirm("Confirm complete database purge? This will reset all targets, subdomains, and findings.")) return;
+            try {
+                const res = await fetch('/api/clear', { method: 'POST' });
+                const data = await res.json();
+                alert(data.message || 'Database purged.');
+                loadStats();
+                loadTargets();
+                loadData();
+                clearConsole();
+            } catch(e) {
+                alert("Failed to clear database: " + e.message);
+            }
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+    </script>
+</body>
+</html>
